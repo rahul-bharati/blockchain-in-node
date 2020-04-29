@@ -96,6 +96,53 @@ class Blockchain {
 
     return validChain;
   }
+
+  getBlock(blockhash) {
+    let correctBlock = null
+    this.chain.forEach(block => {
+      if (block.hash == blockhash) correctBlock = block;
+    });
+    return correctBlock;
+  }
+
+  getTransaction(transactionId) {
+    let correctTransaction = null;
+    let correctBlock = null;
+    this.chain.forEach(block => {
+      block.transactions.forEach(transaction => {
+        if(transaction.transactionId === transactionId) {
+          correctTransaction = transaction;
+          correctBlock = block;
+        }
+      })
+    })
+    return {transaction: correctTransaction, block: correctBlock};
+  }
+
+  getAddressData(address) {
+    const addressTransactions = [];
+    this.chain.forEach(block => {
+      block.transactions.forEach(transaction => {
+        if(transaction.sender === address || transaction.recipient === address) {
+          addressTransactions.push(transaction)
+        }
+      })
+    });
+
+    let balance = 0;
+    addressTransactions.forEach(transaction => {
+      if(transaction.recipient === address) {
+        balance += transaction.amount;
+      } else if (transaction.sender === address) {
+        balance -= transaction.amount;
+      }
+    });
+
+    return {
+      addressTransactions,
+      addressBalance: balance
+    }
+  }
 }
 
 export default Blockchain;

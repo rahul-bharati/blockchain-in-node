@@ -4,6 +4,10 @@ import Blockchain from './blockchain.js';
 import uuid from 'uuid/v1.js';
 import request from 'request';
 import rp from 'request-promise'
+import path from 'path';
+
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const port = process.argv[2];
 
@@ -17,12 +21,12 @@ app.get('/', (req, res) => {
   res.send("Let's build a blockchain");
 });
 
-app.get('/blockchain', (req, res) => {
-  res.send(bitcoin);
+app.get('/block-explorer', (req, res) => {
+  res.sendFile('./block-explorer/index.html', {root: __dirname});
 });
 
-app.get('/transaction', (req, res) => {
-
+app.get('/blockchain', (req, res) => {
+  res.send(bitcoin);
 });
 
 app.post('/transaction', (req, res) => {
@@ -217,16 +221,26 @@ app.get('/consensus', (req, res) => {
   });
 });
 
-app.get('/block/:block', (req, res) => {
-
+app.get('/block/:blockhash', (req, res) => {
+  const blockHash = req.params.blockhash;
+  const correctBlock = bitcoin.getBlock(blockHash);
+  res.json({
+    block: correctBlock
+  })
 })
 
-app.get('/transaction/:transaction', (req, res) => {
-
+app.get('/transaction/:transactionId', (req, res) => {
+  const transactionId = req.params.transactionId;
+  const transactionData = bitcoin.getTransaction(transactionId);
+  return res.json(transactionData);
 })
 
 app.get('/address/:address', (req, res) => {
-  
+  const address = req.params.address;
+  const addressData = bitcoin.getAddressData(address);
+  res.json({
+    addressData
+  })
 })
 
 app.listen(port, () => {
